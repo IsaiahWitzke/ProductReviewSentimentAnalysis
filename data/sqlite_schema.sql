@@ -1,4 +1,4 @@
-
+--reviews.db
 
 CREATE TABLE user_reviews (
 	id				INTEGER		UNIQUE PRIMARY KEY,
