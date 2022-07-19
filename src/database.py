@@ -42,6 +42,12 @@ def insert_aws_key_phrases(data, review_id):
 	conn.commit()
 	conn.close()
 
+def insert_new_review_text(text):
+	insert_reviews([{
+			"asin": 123,
+			"reviewText": text
+		}])
+
 def insert_reviews(data):
 	conn = sqlite3.connect("reviews.db")
 

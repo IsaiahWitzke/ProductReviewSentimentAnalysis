@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Demo Review Site</title>
+		<style>
+
+		</style>
+    </head>
+    <body>
+		<h1>{% block title %} Add a New Review {% endblock %}</h1>
+		<img src="/static/khalil.jpg">
+		<form method="post">
+	
+			<label for="review">Product Review</label>
+			<br>
+			<textarea name="review"
+					  placeholder="Product review"
+					  rows="15"
+					  cols="60"
+					  >{{ request.form['review'] }}</textarea>
+			<br>
+			<button type="submit">Submit</button>
+		</form>
+    </body>
+</html>
