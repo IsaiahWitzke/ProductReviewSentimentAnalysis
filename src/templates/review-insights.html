@@ -5,46 +5,71 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="X-UA-Compatible" content="ie=edge" />
         <title>Demo Review Site</title>
-		<style>
-
-		</style>
+        <style></style>
     </head>
     <body>
-		<h1>Review Insights (placeholder page for CRM system)</h1>
+        <h1>Review Insights (placeholder page for CRM system)</h1>
 
-		<form method="post">
-			<label for="product_id">Pick a product to view insights for: </label>
-			<br>
-			<select name="product_id">
-				{% for product_id in product_ids %}
-				<option value="{{product_id}}">{{product_id}}</option>"
-				{% endfor %}
-			</select>
-			<br>
-			<button type="submit">Submit</button>
-		</form>
+        <form method="post">
+            <label for="product_id"
+                >Pick a product to view insights for:
+            </label>
+            <br />
+            <select name="product_id">
+                {% for product_id in product_ids %}
+                <option value="{{product_id}}">{{product_id}}</option>
+                " {% endfor %}
+            </select>
+            <br />
+            <button type="submit">Submit</button>
+        </form>
 
-		{% if display_insights %}
-		<div style="display: flex; flex-direction: row;">
-			<div style="flex-grow: 1">
-				<h2>AWS Insights</h2>
-			</div>
-			<div style="flex-grow: 1">
-				<h2>Azure Insights</h2>
-			</div>
-		</div>
-		<div>
-			<h2>Reviews</h2>
-			<table>
-				<thead><tr><th>Review</th><th>Sentiment</th></tr></thead>
-				<tbody>
-				{% for review in reviews %}
-				<tr><td>{{review}}</td><td>Description1</td></tr>
-				{% endfor %}
-				</tbody>
-			</table>
-
-		</div>
-		{% endif %}
+        {% if display_insights %}
+        <div style="display: flex; flex-direction: row">
+            <div style="flex-grow: 1">
+                <h2>AWS Insights</h2>
+				<img src="/static/{{ review_insights.get('wordcloud') }}">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Review</th>
+                            <th>Sentiment</th>
+                            <th>Sentiment Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for review in review_insights.get('reviews') %}
+                        <tr>
+                            <td>{{ review['reviewText'] }}</td>
+                            <td>{{review['sentiment']['sentiment']}}</td>
+                            <td>{{review['sentiment']['confidence']}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div style="flex-grow: 1">
+                <h2>Azure Insights</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Review</th>
+                            <th>Sentiment</th>
+                            <th>Sentiment Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for review in review_insights.get('reviews') %}
+                        <tr>
+                            <td>{{ review['reviewText'] }}</td>
+                            <td>{{review['sentiment']['sentiment']}}</td>
+                            <td>{{review['sentiment']['confidence']}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
     </body>
 </html>

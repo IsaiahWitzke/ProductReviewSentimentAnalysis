@@ -40,6 +40,17 @@ def insert_aws_key_phrases(data, review_id):
 			review_id
 		)
 		cur.execute(sql, values)
+	
+	if len(data.get('KeyPhrases')) == 0:
+		values = (
+			"",
+			None,
+			None,
+			None,
+			review_id
+		)
+		cur.execute(sql, values)
+
 	conn.commit()
 	conn.close()
 
@@ -82,8 +93,8 @@ def get_aws_sentiments(asin = None):
 		""").fetchall()
 	else:
 		rows = conn.execute("""
-		SELECT id, sentiment, sentimentScorePositive, sentimentScoreNegative, sentimentScoreNeutral, sentimentScoreMixed, userReview
-		FROM aws_sentiment as2 join user_reviews ur on as.userReview = ur.id where ur.asin = ?;
+		SELECT as2.id, sentiment, sentimentScorePositive, sentimentScoreNegative, sentimentScoreNeutral, sentimentScoreMixed, userReview
+		FROM aws_sentiment as2 join user_reviews ur on as2.userReview = ur.id where ur.asin = ?;
 		""", (asin,)).fetchall()
 
 	conn.close()
@@ -92,15 +103,23 @@ def get_aws_sentiments(asin = None):
 def get_aws_key_phrases(asin = None):
 	conn = sqlite3.connect("reviews.db")
 	if asin == None:
-		rows = conn.execute("SELECT akp.id, akp.\"text\", akp.score ur.id from aws_key_phrases akp inner join user_reviews ur on ur.id = akp.userReview where ur.asin = ?;", (asin,)).fetchall()
+		rows = conn.execute("SELECT id, text, \"text\" score userReview FROM aws_key_phrases").fetchall()
 	else:
-		rows = conn.execute("SELECT id, text, \"text\" score FROM aws_key_phrases").fetchall()
+		rows = conn.execute(
+			"SELECT akp.id, akp.\"text\", akp.score, ur.id from aws_key_phrases akp inner join user_reviews ur on ur.id = akp.userReview where ur.asin = ?;"
+			, (asin,)).fetchall()
 	conn.close()
 	return rows
 
-def get_non_analyzed_reviews(asin = None):
+def get_aws_no_key_phrase_analyzed_reviews(asin = None):
 	conn = sqlite3.connect("reviews.db")
-	sentiments_review_ids = set([s[6] for s in get_aws_sentiments()])
+	kp_review_ids = set([s[3] for s in get_aws_key_phrases(asin)])	# ids of all the review ids that have a corresponding kp row
+	reviews = [r for r in get_reviews(asin) if not r[0] in kp_review_ids]
+	return reviews
+
+def get_aws_no_sentiment_analyzed_reviews(asin = None):
+	conn = sqlite3.connect("reviews.db")
+	sentiments_review_ids = set([s[6] for s in get_aws_sentiments(asin)])	# ids of all the review ids that have a corresponding sentiment analysis row
 	reviews = [r for r in get_reviews(asin) if not r[0] in sentiments_review_ids]
 	return reviews
 
@@ -120,15 +139,53 @@ def get_product_ids():
 	conn.close()
 	return rows
 
+def delete_reviews(asin=123):
+	conn = sqlite3.connect("reviews.db")
+	conn.execute("DELETE FROM aws_key_phrases where userReview in (SELECT ur.id FROM user_reviews ur WHERE ur.asin = ?);", (asin,))
+	conn.execute("DELETE FROM aws_sentiment where userReview in (SELECT ur.id FROM user_reviews ur WHERE ur.asin = ?);", (asin,))
+	conn.execute("DELETE FROM user_reviews WHERE asin = ?;", (asin,))
+	conn.commit()
+	conn.close()
+	
+
+
 def get_aws_insights(asin):
 	key_phrases = get_aws_key_phrases(asin)
 	sentiments = get_aws_sentiments(asin)
 	reviews = get_reviews(asin)
 
 	reviews_joined = []
+	key_phrases_text = [kp[1] for kp in key_phrases]
+
+	for r in reviews:
+		r_key_phrases = [{'id': kp[0], 'phrase': kp[1]} for kp in key_phrases if kp[3] == r[0]]
+		
+		sentiments_idx = -1
+		for i in range(len(sentiments)):
+			if sentiments[i][6] == r[0]:
+				sentiments_idx = i
+				break
+
+		if sentiments_idx != -1:
+			s = sentiments[sentiments_idx]
+			r_sentiment = {
+				'id': s[0],
+				'sentiment': s[1],
+				'confidence': max(s[2:6])
+			}
+		else:
+			r_sentiment = None
+
+		reviews_joined.append({
+			'id': r[0],
+			'reviewText' : r[1],
+			'sentiment' : r_sentiment,
+			'keyPhrases' : r_key_phrases
+		})
+		reviews_joined
 	
 
 	return {
-		'reviews': 
-		'wordcloud' : wordcloud_generator.generate_wordcloud(key_phrases)
+		'reviews': reviews_joined,
+		'wordcloud' : wordcloud_generator.generate_wordcloud(key_phrases_text, str(asin) + "_aws.png")
 	}
