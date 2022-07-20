@@ -10,7 +10,7 @@
 		</style>
     </head>
     <body>
-		<h1>{% block title %} Add a New Review {% endblock %}</h1>
+		<h1>Add a New Review </h1>
 		<img src="/static/khalil.jpg">
 		<form method="post">
 	
@@ -24,5 +24,7 @@
 			<br>
 			<button type="submit">Submit</button>
 		</form>
+
+		<a href="{{ url_for('review_insights') }}">Go to review insights</a>
     </body>
 </html>

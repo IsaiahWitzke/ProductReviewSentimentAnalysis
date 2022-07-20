@@ -1,4 +1,5 @@
 import sqlite3
+import wordcloud_generator
 
 
 def insert_aws_sentiment(data, review_id):
@@ -72,26 +73,62 @@ def insert_reviews(data):
 
 	conn.close()
 
-def get_aws_sentiments():
+def get_aws_sentiments(asin = None):
 	conn = sqlite3.connect("reviews.db")
-	cur = conn.execute("SELECT * FROM aws_sentiment")
-	rows = cur.fetchall()
-	cols = [description[0] for description in cur.description]
-	conn.close()
-	return cols, rows
+	if asin == None:
+		rows = conn.execute("""
+		SELECT id, sentiment, sentimentScorePositive, sentimentScoreNegative, sentimentScoreNeutral, sentimentScoreMixed, userReview
+		FROM aws_sentiment
+		""").fetchall()
+	else:
+		rows = conn.execute("""
+		SELECT id, sentiment, sentimentScorePositive, sentimentScoreNegative, sentimentScoreNeutral, sentimentScoreMixed, userReview
+		FROM aws_sentiment as2 join user_reviews ur on as.userReview = ur.id where ur.asin = ?;
+		""", (asin,)).fetchall()
 
-def get_aws_key_phrases():
-	conn = sqlite3.connect("reviews.db")
-	cur = conn.execute("SELECT * FROM aws_key_phrases")
-	rows = cur.fetchall()
-	cols = [description[0] for description in cur.description]
 	conn.close()
-	return cols, rows
+	return rows
 
-def get_reviews():
+def get_aws_key_phrases(asin = None):
 	conn = sqlite3.connect("reviews.db")
-	cur = conn.execute("SELECT * FROM user_reviews")
-	rows = cur.fetchall()
-	cols = [description[0] for description in cur.description]
+	if asin == None:
+		rows = conn.execute("SELECT akp.id, akp.\"text\", akp.score ur.id from aws_key_phrases akp inner join user_reviews ur on ur.id = akp.userReview where ur.asin = ?;", (asin,)).fetchall()
+	else:
+		rows = conn.execute("SELECT id, text, \"text\" score FROM aws_key_phrases").fetchall()
 	conn.close()
-	return cols, rows
+	return rows
+
+def get_non_analyzed_reviews(asin = None):
+	conn = sqlite3.connect("reviews.db")
+	sentiments_review_ids = set([s[6] for s in get_aws_sentiments()])
+	reviews = [r for r in get_reviews(asin) if not r[0] in sentiments_review_ids]
+	return reviews
+
+def get_reviews(asin = None):
+	conn = sqlite3.connect("reviews.db")
+	if asin == None:
+		rows = conn.execute("SELECT id, reviewText FROM user_reviews").fetchall()
+	else:
+		rows = conn.execute("SELECT id, reviewText FROM user_reviews WHERE asin = ?", (asin,)).fetchall()
+	conn.close()
+	return rows
+
+def get_product_ids():
+	conn = sqlite3.connect("reviews.db")
+	cur = conn.execute("SELECT DISTINCT asin from user_reviews ur ORDER BY asin ASC;")
+	rows = [row[0] for row in cur.fetchall()]
+	conn.close()
+	return rows
+
+def get_aws_insights(asin):
+	key_phrases = get_aws_key_phrases(asin)
+	sentiments = get_aws_sentiments(asin)
+	reviews = get_reviews(asin)
+
+	reviews_joined = []
+	
+
+	return {
+		'reviews': 
+		'wordcloud' : wordcloud_generator.generate_wordcloud(key_phrases)
+	}
