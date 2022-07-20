@@ -51,13 +51,13 @@ CREATE TABLE azure_sentiment (
 );
 
 CREATE TABLE azure_mined_opinion (
-	id			INTEGER		UNIQUE PRIMARY KEY,
-	sentiment	TEXT,
-	text		TEXT,
+	id						INTEGER		UNIQUE PRIMARY KEY,
+	sentiment				TEXT,
+	text					TEXT,
 	sentimentScorePositive	REAL,
 	sentimentScoreNegative	REAL,
 	sentimentScoreNeutral	REAL,
-	userReview	INTEGER 	NOT NULL,
+	userReview				INTEGER 	NOT NULL,
 	
 	FOREIGN KEY(userReview) REFERENCES user_reviews(id)
 );
