@@ -1,3 +1,4 @@
+.env
 .vscode*
 reviews.db
 Video_Games_5.json.gz

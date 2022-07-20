@@ -5,7 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta http-equiv="X-UA-Compatible" content="ie=edge" />
         <title>Demo Review Site</title>
-        <style></style>
+        <style>
+            table,
+            th,
+            td {
+                border: 1px solid;
+            }
+        </style>
     </head>
     <body>
         <h1>Review Insights (placeholder page for CRM system)</h1>
@@ -28,7 +34,34 @@
         <div style="display: flex; flex-direction: row">
             <div style="flex-grow: 1">
                 <h2>AWS Insights</h2>
-				<img src="/static/{{ review_insights.get('wordcloud') }}">
+                <img src="/static/{{ aws_review_insights.get('wordcloud') }}" />
+                <h3>Sentiment Summary for Reviews</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sentiment</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Positive</td>
+                            <td>{{aws_review_insights['total_positive']}}</td>
+                        </tr>
+                        <tr>
+                            <td>Negative</td>
+                            <td>{{aws_review_insights['total_negative']}}</td>
+                        </tr>
+                        <tr>
+                            <td>Neutral</td>
+                            <td>{{aws_review_insights['total_neutral']}}</td>
+                        </tr>
+                        <tr>
+                            <td>Mixed</td>
+                            <td>{{aws_review_insights['total_mixed']}}</td>
+                        </tr>
+                    </tbody>
+                </table>
                 <table>
                     <thead>
                         <tr>
@@ -38,7 +71,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for review in review_insights.get('reviews') %}
+                        {% for review in aws_review_insights.get('reviews') %}
                         <tr>
                             <td>{{ review['reviewText'] }}</td>
                             <td>{{review['sentiment']['sentiment']}}</td>
@@ -50,6 +83,49 @@
             </div>
             <div style="flex-grow: 1">
                 <h2>Azure Insights</h2>
+                <h3>Key phrases</h3>
+                <img
+                    src="/static/{{ azure_review_insights.get('wordcloud_key_phrases') }}"
+                />
+                <h3>OPINION MINING: Positive opinion</h3>
+                <img
+                    src="/static/{{ azure_review_insights.get('wordcloud_positive_targets') }}"
+                />
+                <h3>OPINION MINING: Negative opinion</h3>
+                <img
+                    src="/static/{{ azure_review_insights.get('wordcloud_negative_targets') }}"
+                />
+                <h3>OPINION MINING: Any opinion</h3>
+                <img
+                    src="/static/{{ azure_review_insights.get('wordcloud_all_targets') }}"
+                />
+                <h3>Sentiment Summary for Reviews</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sentiment</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Positive</td>
+                            <td>{{azure_review_insights['total_positive']}}</td>
+                        </tr>
+                        <tr>
+                            <td>Negative</td>
+                            <td>{{azure_review_insights['total_negative']}}</td>
+                        </tr>
+                        <tr>
+                            <td>Neutral</td>
+                            <td>{{azure_review_insights['total_neutral']}}</td>
+                        </tr>
+                        <tr>
+                            <td>Mixed</td>
+                            <td>{{azure_review_insights['total_mixed']}}</td>
+                        </tr>
+                    </tbody>
+                </table>
                 <table>
                     <thead>
                         <tr>
@@ -59,9 +135,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for review in review_insights.get('reviews') %}
+                        {% for review in azure_review_insights.get('reviews') %}
                         <tr>
-                            <td>{{ review['reviewText'] }}</td>
+                            <td>{{review['reviewText']}}</td>
                             <td>{{review['sentiment']['sentiment']}}</td>
                             <td>{{review['sentiment']['confidence']}}</td>
                         </tr>

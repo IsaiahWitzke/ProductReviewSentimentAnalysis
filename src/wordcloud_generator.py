@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 def generate_wordcloud(words, img_name):
 	if len(words) == 0:
 		words = ['placeholder']
-	word_cloud_dict=Counter([w.strip() for w in words])
+	word_cloud_dict=Counter([w.strip().lower() for w in words])
 	stopwords = set(STOPWORDS)
 	wordcloud = WordCloud(width = 800, height = 800,
 					background_color ='white',

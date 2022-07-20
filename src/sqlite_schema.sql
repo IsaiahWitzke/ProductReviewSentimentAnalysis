@@ -37,3 +37,35 @@ CREATE TABLE aws_key_phrases (
 	
 	FOREIGN KEY(userReview) REFERENCES user_reviews(id)
 );
+
+CREATE TABLE azure_sentiment (
+	id						INTEGER		UNIQUE PRIMARY KEY,
+	sentiment				TEXT,
+	sentimentScorePositive	REAL,
+	sentimentScoreNegative	REAL,
+	sentimentScoreNeutral	REAL,
+	datetime				INTEGER 	DEFAULT(datetime('now')),
+	userReview				INTEGER 	NOT NULL,
+	
+	FOREIGN KEY(userReview) REFERENCES user_reviews(id)
+);
+
+CREATE TABLE azure_mined_opinion (
+	id			INTEGER		UNIQUE PRIMARY KEY,
+	sentiment	TEXT,
+	text		TEXT,
+	sentimentScorePositive	REAL,
+	sentimentScoreNegative	REAL,
+	sentimentScoreNeutral	REAL,
+	userReview	INTEGER 	NOT NULL,
+	
+	FOREIGN KEY(userReview) REFERENCES user_reviews(id)
+);
+
+CREATE TABLE azure_key_phrases (
+	id			INTEGER		UNIQUE PRIMARY KEY,
+	text		TEXT,
+	userReview	INTEGER 	NOT NULL,
+	
+	FOREIGN KEY(userReview) REFERENCES user_reviews(id)
+);
